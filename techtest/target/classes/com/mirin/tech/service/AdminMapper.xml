@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mirin.tech.service.AdminMapper">
+ 
+     <select id="adminIndexPMoneyChkList"  resultType="hashmap">
+    <![CDATA[	
+    	SELECT 
+    		A.IDX, 
+    		A.NAME, 
+    		A.NICK, 
+    		B.MIDX, 
+    		B.CHGMONEY, 
+    		DATE_FORMAT(B.INSDATE,'%Y-%M-%D') AS INSDATE, 
+    		B.STATUS 
+				FROM TF_MEMBER A, 
+					TF_MONEY_HIS B 
+			WHERE 
+				A.IDX = B.IDX 
+			AND 
+				B.STATUS = 0 
+			ORDER BY 
+				B.MIDX DESC	
+    ]]>
+    </select>    
+    
+    <select id="adminIndexPProjectChkList" parameterType="com.mirin.tech.service.ProjectVo" resultType="com.mirin.tech.service.ProjectVo">
+    <![CDATA[
+		SELECT 
+			PIDX, 
+			PNAME, 
+			DATE_FORMAT(INSDATE,'%Y-%M-%D') AS INSDATE, 
+			STATUS 
+			FROM 
+				TF_PROJECT_LIST 
+			WHERE 
+				STATUS = 0 
+			ORDER BY 
+				PIDX DESC		
+	 ]]>   
+    </select>
+    
+    <select id="adminProJChkCon" resultType="hashmap" parameterType="com.mirin.tech.service.ProjectVo">
+	<![CDATA[
+		SELECT 
+			PNAME, 
+			PCATE, 
+			PTFUNDS, 
+			PGRADE, 
+			DATE_FORMAT(INSDATE,'%Y-%M-%D') AS INSDATE, 
+			CONTENTS, 
+			ITLIST
+			FROM 
+				TF_PROJECT_LIST 
+			WHERE 
+				PIDX = #{pIdx}
+	]]>	
+	</select>
+      
+    <select id="adminIndexPCmemChkList" parameterType="com.mirin.tech.service.MemberVo" resultType="com.mirin.tech.service.MemberVo">
+	<![CDATA[
+		SELECT 
+			A.IDX, 
+			A.NAME, 
+			B.COMPANY, 
+			A.MODDATE 
+			FROM 
+				TF_MEMBER A, 
+				TF_CMEMBER_EXT B 
+			WHERE 
+				A.IDX = B.IDX 
+			AND 
+				A.STATUS = 0 
+			AND 
+				A.TYPE = 'C' 
+			ORDER BY 
+				B.CIDX DESC	
+	 ]]>  
+    </select>    
+    
+    <select id="adminCmemInfoList" resultType="hashmap" >
+  	<![CDATA[	
+ 		SELECT 
+ 			A.IDX, 
+ 			A.ID, 
+ 			A.NAME, 
+ 			(SELECT 
+ 				SUM(PNFUNDS)
+ 					FROM 
+ 					TF_PROJECT_LIST), 
+ 			B.STATUS 
+			FROM 
+				TF_MEMBER A, 
+				TF_PROJECT_LIST B 
+			WHERE 
+				A.IDX = B.IDX 
+			AND 
+				A.TYPE = 'C'
+	]]>						
+ 	</select>
+ 	
+ 	 <select id="adminCmemInfoCon" resultType="hashmap" parameterType="int" >
+   	 <![CDATA[  
+   	 	SELECT 
+   	 		A.IDX, 
+   	 		A.ID, 
+   	 		A.NICK, 
+   	 		A.NAME, 
+   	 		A.PHONE, 
+   	 		A.ADDR, 
+   	 		B.CNUMBER, 
+   	 		B.CADDR 
+				FROM 
+					TF_MEMBER A, 
+					TF_CMEMBER_EXT B 
+			WHERE 
+				A.IDX = B.IDX 
+			AND 
+				A.TYPE ='C' 
+			AND 
+				A.IDX = #{param_idx}
+    ]]>	
+    </select>
+    
+     <select id="adminCmemInfoProj" resultType="com.mirin.tech.service.ProjectVo">
+    <![CDATA[
+		SELECT 
+			PIDX, 
+			PNFUNDS, 
+			PTFUNDS, 
+			PNAME 
+			FROM 
+				TF_PROJECT_LIST 
+			WHERE 
+				STATUS = 1 
+			AND 
+				IDX = #{param_idx}
+	]]>	
+ 	</select>
+ 	
+   	<select id="adminCmemInfoProjHis" resultType="com.mirin.tech.service.ProjectVo">
+  	<![CDATA[		
+		SELECT 
+			PIDX, 
+			PNAME, 
+			PNFUNDS, 
+			PTFUNDS, 
+			DATE_FORMAT(INSDATE,'%Y-%M-%D') AS INSDATE 
+			FROM 
+				TF_PROJECT_LIST 
+			WHERE 
+				STATUS > 3 
+			AND 
+				PIDX = #{pIdx} 
+			ORDER BY 
+				PIDX DESC
+  	]]>  	
+  	</select>
+  		
+   	<select id="adminCmemInfoProjFundHis" resultType="hashmap">
+  	<![CDATA[	
+		SELECT 
+			A.NICK, 
+			B.AFUNDS, 
+			DATE_FORMAT(B.INSDATE,'%Y-%M-%D') AS INSDATE, 
+			B.STATUS 
+				FROM 
+					TF_MEMBER A, 
+					TF_FUND_HIS B 
+			WHERE 
+				A.IDX = B.IDX 
+			AND 
+				B.PIDX = 
+					(SELECT 
+						PIDX 
+						FROM 
+							TF_PROJECT_LIST 
+						WHERE 
+							IDX = #{idx} 
+						AND 
+							STATUS = 1) 
+			ORDER BY 
+				B.FIDX DESC
+	]]>
+	</select>  
+ 	
+	
+	<select id="adminCmemInfoProjQna" resultType="com.mirin.tech.service.BoardVo">
+		<![CDATA[
+		SELECT * 
+			FROM 
+				TF_BOARD_QNA 
+			WHERE 
+				VIEWSTAT = 1 
+			AND 
+				BIDX = #{bIdx}
+			ORDER BY 
+				BIDX DESC
+		]]>
+	</select>
+
+ 	
+	<select id="adminImemInfoList" resultType="com.mirin.tech.service.MemberVo">
+	<![CDATA[
+	SELECT 
+		A.IDX, 
+		A.ID, 
+		A.NAME, 
+		A.STATUS, 
+		B.MONEY 
+		FROM 
+			TF_MEMBER A, 
+			TF_IMEMBER_EXT B 
+		WHERE 
+			A.IDX = B.IDX 
+		AND 
+			A.TYPE = 'I' 
+		ORDER BY 
+			IIDX DESC
+	]]>
+	</select>
+	
+	<select id="adminImemInfoCon" resultType="com.mirin.tech.service.MemberVo">
+		<![CDATA[
+		SELECT 
+			IDX, 
+			ID, 
+			NAME, 
+			PHONE, 
+			ADDR 
+			FROM 
+				TF_MEMBER 
+			WHERE 
+				IDX = #{idx}
+		]]>
+	</select> 
+	
+	<select id="adminImemInfoMoneyHis" resultType="com.mirin.tech.service.MoneyVo">
+		<![CDATA[
+		SELECT 
+			IDX, 
+			MIDX, 
+			CHGMONEY, 
+			DATE_FORMAT(INSDATE,'%Y-%M-%D') AS INSDATE, 
+			STATUS 
+			FROM 
+				TF_MONEY_HIS 
+			WHERE 
+				IDX = #{idx}
+			ORDER BY 
+				MIDX DESC
+		]]>
+	</select>
+	
+		<select id="adminImemInfoProjHis" resultType="hashmap">
+		<![CDATA[
+		SELECT 
+			A.PIDX, 
+			A.PNAME, 
+			B.INFUNDS, 
+			DATE_FORMAT(B.INSDATE,'%Y-%M-%D') AS INSDATE, 
+			A.PNFUNDS, 
+			A.PTFUNDS 
+			FROM 
+				TF_PROJECT_LIST A, 
+				TF_FUND_HIS B 
+			WHERE 
+				A.PIDX = B.PIDX 
+			AND 
+				B.IDX = #{idx}
+			ORDER BY 
+				B.FIDX DESC
+		]]>
+	</select>
+	
+	<select id="adminImemInfoQnaHis" resultType="hashmap">
+		<![CDATA[
+		SELECT 
+			A.NICK, 
+			B.TITLE, 
+			DATE_FORMAT(B.INSDATE,'%Y-%M-%D') AS INSDATE, 
+			B.BDEPTH, 
+			B.BIDX 
+			FROM 
+				TF_MEMBER A, 
+				TF_BOARD_QNA B 
+			WHERE 
+				A.IDX = B.IDX 
+			AND 
+				A.IDX = #{idx}
+			ORDER BY 
+				B.BIDX DESC
+		]]>
+	</select>	
+	
+	<select id="adminBoardFaqList" resultType="com.mirin.tech.service.BoardVo">
+    <![CDATA[
+		SELECT TITLE, CATE, VIEWSTAT, DATE_FORMAT(INSDATE,'%Y-%M-%D') AS INSDATE, CONTENTS, HIT 
+			FROM 
+				TF_BOARD_FAQ 
+			WHERE 
+				VIEWSTAT >= 0
+			ORDER BY 
+				OBIDX DESC, 
+				RBIDX ASC
+     ]]>	
+    </select>
+    
+    <select id="adminBoardFaqCon" resultType="com.mirin.tech.service.BoardVo">
+    <![CDATA[
+    	SELECT TITLE, CATE, VIEWSTAT, DATE_FORMAT(INSDATE,'%Y-%M-%D') AS INSDATE, CONTENTS, HIT
+    		FROM 
+    			TF_BOARD_FAQ
+    		WHERE 
+    			BIDX =#{bIdx}
+    ]]>
+    </select>
+    
+    <select id="adminBoardFaqModCon" resultType="com.mirin.tech.service.BoardVo">
+    <![CDATA[
+    	SELECT TITLE, CATE, VIEWSTAT, DATE_FORMAT(INSDATE,'%Y-%M-%D') AS INSDATE, CONTENTS, HIT
+    		FROM 
+    			TF_BOARD_FAQ
+    		WHERE 
+    			BIDX =#{bIdx}
+    ]]>     
+    </select>
+    
+    <update id="adminBoardFaqMod" parameterType="com.mirin.tech.service.BoardVo">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_FAQ 
+			SET 
+				CATE = #{cate}, 
+				TITLE = #{title}, 
+				CONTENTS = #{contents}, 
+				MODDATE = SYSDATE 
+			WHERE 
+				BIDX = #{bIdx}
+	]]>
+	</update>
+	
+	<update id="adminBoardFaqDel" parameterType="int">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_FAQ 
+			SET 
+				VIEWSTAT = 0 	
+			WHERE 
+				BIDX = #{bIdx}
+	]]>	
+	</update>
+    
+	<select id="adminBoardNewsList" resultType="com.mirin.tech.service.BoardVo">
+	<![CDATA[
+		SELECT * 
+			FROM 
+				TF_BOARD_NEWS 
+			WHERE 
+				VIEWSTAT >= 0 
+			ORDER BY 
+				OBIDX DESC, 
+				RBIDX ASC
+	]]>
+	</select>    
+	
+	<select id="adminBoardNoticeList" resultType="com.mirin.tech.service.BoardVo">
+	<![CDATA[
+		SELECT TITLE, CATE, VIEWSTAT, DATE_FORMAT(INSDATE,'%Y-%M-%D') AS INSDATE 
+			FROM 
+				TF_BOARD_NOTICE 
+			WHERE 
+				VIEWSTAT >= 0 
+			ORDER BY 
+				OBIDX DESC, 
+				RBIDX ASC
+	]]>
+	</select> 
+	
+		<select id="adminBoardNoticeCon" resultType="com.mirin.tech.service.BoardVo">
+		<![CDATA[
+		SELECT * 
+			FROM 
+				TF_BOARD_NOTICE 
+			WHERE 
+				BIDX = #{bIdx}
+		]]>
+	</select>
+	
+	<update id="adminBoardNoticeMod" parameterType="com.mirin.tech.service.BoardVo">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_NOTICE 
+			SET 
+				CATE = #{cate}, 
+				TITLE = #{title}, 
+				CONTENTS = #{contents}, 
+				MODDATE = SYSDATE 
+			WHERE 
+				BIDX = #{bIdx}
+	]]>
+	</update>
+	
+	<update id="adminBoardNoticeDel" parameterType="int">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_NOTICE 
+			SET 
+				VIEWSTAT = 0 	
+			WHERE 
+				BIDX = #{bIdx}
+	]]>	
+	</update>
+	
+	<select id="adminBoardQnaList" resultType="com.mirin.tech.service.BoardVo">
+	<![CDATA[
+		SELECT 
+			TITLE, 
+			CATE, 
+			DATE_FORMAT(INSDATE,'%Y-%M-%D') AS INSDATE, 
+			VIEWSTAT 
+			FROM 
+				TF_BOARD_QNA
+			WHERE 
+				VIEWSTAT >= 0 
+			ORDER BY 
+				OBIDX DESC, 
+				RBIDX ASC
+	]]>
+	</select> 
+	
+	<select id="adminBoardQnaCon" resultType="com.mirin.tech.service.BoardVo">
+		<![CDATA[
+		SELECT * 
+			FROM 
+				TF_BOARD_QNA 
+			WHERE 
+				BIDX = #{bIdx}
+		]]>			
+	</select>
+	
+	<update id="adminBoardQnaMod" parameterType="com.mirin.tech.service.BoardVo">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_QNA 
+			SET 
+				CATE = #{cate}, 
+				TITLE = #{title}, 
+				CONTENTS = #{contents}, 
+				MODDATE = SYSDATE 
+			WHERE 
+				BIDX = #{bIdx}
+	]]>
+	</update>
+	
+	<update id="adminBoardQnaDel" parameterType="int">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_QNA 
+			SET 
+				VIEWSTAT = 0 	
+			WHERE 
+				BIDX = #{bIdx}
+	]]>	
+	</update>
+	
+	<select id="adminCmemChkList" resultType="com.mirin.tech.service.MemberVo">
+	<![CDATA[
+		SELECT 
+			IDX, 
+			NAME, 
+			MODDATE, 
+			STATUS
+			FROM 
+				TF_MEMBER 
+			WHERE 
+				TYPE = 'C' 
+			AND 
+				STATUS = 0 
+			ORDER BY 
+				IDX DESC
+	]]>
+	</select>
+<!-- 
+	<update id ="adminMoneyModOkTransaction" parameterType="com.mirin.tech.service.BoardVo">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_QNA 
+		SET 
+			TITLE = #{title}, 
+			CONTENTS = #{contents},  
+			MODDATE = SYSDATE 
+		WHERE 
+			BIDX = #{bIdx} 
+	]]>	
+	</update>
+ -->
+ 
+</mapper>
+ 
+
+

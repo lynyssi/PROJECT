@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mirin.tech.service.CMemberMapper">
+	
+	<select id="cMemberIndexProjNowList" parameterType="int" resultType="com.mirin.tech.service.ProjectVo">
+	<![CDATA[	
+		SELECT 
+			PIDX, 
+			IDX, 
+			PNAME, 
+			PCATE, 
+			PTFUNDS, 
+			PNFUNDS, 
+			PGRADE, 
+			STATUS 
+		FROM 
+			TF_PROJECT_LIST 
+		WHERE 
+			STATUS = 1			
+		AND 
+			IDX = #{idx}
+	]]>
+	</select>
+	
+	<select id="cMemberIndexCommList" parameterType="int" resultType="hashmap">
+	<![CDATA[	
+		SELECT 
+			B.NAME, 
+			A.COMMENTS, 
+			A.GOOD, 
+			A.BAD, 
+			A.INSDATE
+		FROM 
+			TF_PROJECT_COMM A, 
+			TF_MEMBER B
+		WHERE 
+			A.IDX = B.IDX
+		AND 
+			A.VIEWSTAT = 1 
+  		AND 
+  			PIDX = 
+  			(SELECT 
+  				PIDX 
+  				FROM 
+  					TF_PROJECT_LIST 
+  				WHERE 
+  					STATUS = 1 
+  				AND 
+  					IDX = #{sess_idx}) 
+  			ORDER BY 
+  				OPCOMMIDX DESC, 
+  				RPCOMMIDX ASC
+	]]>
+	</select>	
+		
+	<select id="cMemberInfoExtWriteChk" parameterType="int" resultType="int">
+	<![CDATA[	
+		SELECT 
+			COUNT(*) 
+		FROM 
+			TF_CMEMBER_EXT 
+		WHERE 
+			IDX = #{sess_idx}
+	]]> 		
+	</select>
+	
+	<insert id="cMemberInfoExtWrite" parameterType="hashmap">
+	<![CDATA[
+		INSERT INTO 
+			TF_CMEMBER_EXT
+				(CIDX, 
+				IDX, 
+				COMPANY, 
+				CNUMBER, 
+				CADDR)
+		VALUES
+			(null, 
+			#{sess_idx}, 
+			#{company}, 
+			#{cNumber}, 
+			#{cAddr})
+	]]>
+	</insert>
+	
+	<select id="cMemberInfoCon" parameterType="int" resultType="hashmap">
+	<![CDATA[
+		SELECT 
+			A.*, 
+			B.* 
+		FROM 
+			TF_MEMBER A, 
+			TF_CMEMBER_EXT B 
+		WHERE 
+			A.IDX = B.IDX
+		AND 
+			A.IDX = #{sess_idx}
+	]]>			
+	</select>
+	
+	<select id="cMemberInfoModChk" parameterType="com.mirin.tech.service.MemberVo" resultType="int">
+	<![CDATA[	
+		SELECT 
+			COUNT(*)
+		FROM 
+			TF_MEMBER 
+		WHERE 
+			IDX = #{idx}
+		AND 
+			PW = #{pw}
+	]]>	
+	</select>
+	
+	<update id="cMemberInfoMod" parameterType="com.mirin.tech.service.MemberVo">
+	<![CDATA[	
+		UPDATE 
+			TF_MEMBER 
+		SET 
+			PW = #{pw}, 
+			NICK = #{nick}, 
+			PHONE = #{phone}, 
+			ADDR = #{addr}, 
+			MODDATE = SYSDATE 
+		WHERE 
+			IDX = #{idx}
+	]]>
+	</update>
+			
+	<select id="cMemberNewsList" parameterType="int" resultType="com.mirin.tech.service.BoardVo">
+	<![CDATA[
+		SELECT 
+			B.BIDX, 
+			B.CATE, 
+			B.TITLE, 
+			B.INSDATE
+		FROM 
+			TF_PROJECT_LIST A, 
+			TF_BOARD_NEWS B 
+		WHERE 
+			B.VIEWSTAT = 1 
+		AND 
+			A.PIDX = B.PIDX 
+		AND 
+			A.IDX = #{sess_idx}
+		ORDER BY 
+			B.OBIDX DESC, 
+			B.RBIDX ASC
+	]]>
+	</select>
+	
+	<select id="cMemberNewsCon" parameterType="int" resultType="hashmap">
+	<![CDATA[		
+		SELECT 
+			A.BIDX, 
+			A.CATE, 
+			A.TITLE, 
+			A.CONTENTS, 
+			A.GOOD, 
+			A.BAD, 
+			A.INSDATE, 
+			B.PIDX, 
+			B.PNAME, 
+			B.PNFUNDS, 
+			B.PTFUNDS, 
+			B.PGRADE, 
+			B.STATUS 
+		FROM 
+			TF_BOARD_NEWS A, 
+			TF_PROJECT_LIST B 
+		WHERE 
+			A.PIDX = B.PIDX 
+		AND 
+			A.BIDX = #{bIdx}
+	]]>
+	</select>	
+	
+	<update id="cMemberNewsMod" parameterType="com.mirin.tech.service.BoardVo">
+	<![CDATA[	
+		UPDATE 
+			TF_BOARD_NEWS
+		SET 
+			CATE = 
+				(SELECT 
+					PCATE 
+					FROM 
+						TF_PROJECT_LIST 
+					WHERE 
+						PIDX = #{pIdx}), 
+						TITLE = #{title}, 
+						CONTENTS = #{contents}, 
+						MODDATE = SYSDATE, 
+						PIDX = #{pIdx}
+		WHERE 
+			BIDX = #{bIdx}
+	]]>
+	</update>
+	
+	<select id="cMemberNewsWriteProjNow" parameterType="int" resultType="com.mirin.tech.service.ProjectVo">
+	<![CDATA[	
+		SELECT 
+			PIDX, 
+			IDX, 
+			PNAME, 
+			PCATE, 
+			PTFUNDS, 
+			PNFUNDS, 
+			PGRADE, 
+			STATUS 
+		FROM 
+			TF_PROJECT_LIST 
+		WHERE 
+			STATUS = 1 
+		AND 
+			IDX = #{sess_idx}
+	]]>
+	</select>
+
+	<insert id="cMemberNewsWrite" parameterType="com.mirin.tech.service.BoardVo">
+	<![CDATA[
+		INSERT INTO 
+			TF_BOARD_NEWS 
+				(BIDX, 
+				IDX, 
+				CATE, 
+				TITLE, 
+				CONTENTS, 
+				HIT, 
+				GOOD, 
+				BAD, 
+				OBIDX, 
+				RBIDX, 
+				BDEPTH, 
+				COMMCNT,
+				VIEWSTAT, 
+				INSDATE, 
+				MODDATE, 
+				PIDX) 
+			VALUES 
+				(null, 
+				#{idx}, 
+				(SELECT 
+					PCATE 
+					FROM 
+						TF_PROJECT_LIST 
+					WHERE 
+						PIDX = #{pIdx}),
+				#{title},
+				#{contents},
+				0, 
+				0, 
+				0, 
+				nullL, 
+				1, 
+				1, 
+				0, 
+				1, 
+				SYSDATE, 
+				SYSDATE, 
+				#{pIdx})
+	]]>			
+	</insert>
+	
+	<update id="cMemberNewsDel" parameterType="int">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_NEWS 
+		SET 
+			VIEWSTAT = 0, 
+			MODDATE = SYSDATE 
+		WHERE 
+			BIDX = #{bIdx}
+	]]>
+	</update> 
+	
+	<select id="cMemberProjNowList" parameterType="int" resultType="com.mirin.tech.service.ProjectVo">
+	<![CDATA[	
+		SELECT 
+			PIDX, 
+			IDX, 
+			PNAME, 
+			PCATE, 
+			PTFUNDS, 
+			PNFUNDS, 
+			PGRADE, 
+			STATUS 
+		FROM 
+			TF_PROJECT_LIST 
+		WHERE 
+			STATUS = 1 
+		AND 
+			IDX = #{sess_idx}
+	]]>
+	</select>
+	
+	<select id="cMemberProjHisList" parameterType="int" resultType="com.mirin.tech.service.ProjectVo">
+	<![CDATA[	
+		SELECT 
+			PIDX, 
+			IDX, 
+			PNAME, 
+			PCATE, 
+			PTFUNDS, 
+			PNFUNDS, 
+			PGRADE, 
+			STATUS 
+		FROM 
+			TF_PROJECT_LIST 
+		WHERE 
+			STATUS > 3 
+		AND 
+			IDX = #{sess_idx}
+	]]>
+	</select>
+	
+	
+</mapper>

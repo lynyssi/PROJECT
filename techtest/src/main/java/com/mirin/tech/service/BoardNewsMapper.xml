@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mirin.tech.service.BoardNewsMapper">
+
+    <select id="boardNewsListCate"  resultType="com.mirin.tech.service.BoardVo">
+   	<![CDATA[
+   	    SELECT 
+   	    	* 
+   	    	FROM 
+   	    		TF_BOARD_NEWS 
+   	    WHERE 
+   	    	VIEWSTAT = 1 
+   	    AND 
+   	    	CATE = #{cate, jdbcType=VARCHAR} 
+   	    ORDER BY 
+   	    	OBIDX DESC, 
+   	    	RBIDX ASC
+    ]]>
+    </select>
+	
+	<select id="boardNewsCon" resultType="com.mirin.tech.service.BoardVo" parameterType="int" >
+	<![CDATA[
+		SELECT 
+			* 
+		FROM 
+			TF_BOARD_NEWS 
+		WHERE 
+			BIDX = #{bIdx}	
+	]]>
+	</select>
+	
+	<select id="boardNewsCommList" resultType="hashmap" >
+	
+	<![CDATA[ 
+		SELECT 
+			A.COMMENTS, 
+			A.BIDX, 
+			A.IDX, 
+			DATE_FORMAT(A.INSDATE,'%Y-%M-%D') AS INSDATE, 
+			A.MODDATE, 
+			A.COMMIDX , 
+			B.NICK
+		FROM 
+			TF_BOARD_COMM_NEWS A, 
+			TF_MEMBER B 
+		WHERE 
+			A.IDX = B.IDX 
+		AND 
+			A.BIDX = #{bIdx} 
+		AND 
+			A.OCOMMIDX = A.COMMIDX 
+		AND 
+			A.VIEWSTAT = 1 
+		ORDER BY 
+			A.OCOMMIDX DESC, 
+			A.RCOMMIDX ASC 
+	]]>
+	</select>
+	
+	<select id="boardNewsSubCommList" resultType="hashmap" >
+	<![CDATA[
+		SELECT 
+			A.COMMENTS, 
+			A.BIDX, 
+			A.IDX, 
+			DATE_FORMAT(A.INSDATE,'%Y-%M-%D') AS INSDATE, 
+			DATE_FORMAT(A.MODDATE,'%Y-%M-%D') AS MODDATE, 
+			A.COMMIDX , 
+			B.NICK 
+		FROM 
+			TF_BOARD_COMM_NEWS A,
+			TF_MEMBER B 
+		WHERE 
+			A.IDX = B.IDX 
+		AND 
+			A.OCOMMIDX = #{commIdx} 
+		AND 
+			A.BIDX = #{bIdx} 
+		AND 
+			A.COMMIDX > A.OCOMMIDX 
+		AND 
+			A.VIEWSTAT = 1 
+		ORDER BY 
+			A.OCOMMIDX ASC, 
+			A.RCOMMIDX DESC	
+	]]>
+	</select>
+
+
+	<insert id="boardNewsCommWrite" parameterType="int">
+	<![CDATA[
+		INSERT INTO 
+			TF_BOARD_COMM_NEWS 
+				(COMMIDX, 
+				BIDX, 
+				IDX, 
+				COMMENTS, 
+				GOOD, 
+				BAD, 
+				OCOMMIDX, 
+				RCOMMIDX, 
+				COMMDEPTH, 
+				VIEWSTAT, 
+				DATE_FORMAT(INSDATE,'%Y-%M-%D') AS INSDATE, 
+				DATE_FORMAT(MODDATE,'%Y-%M-%D') AS MODDATE ) 
+			VALUES 
+				(null, 
+				#{bIdx}, 
+				#{idx}, 
+				#{comments}, 
+				0, 
+				0, 
+				null, 
+				1, 
+				1, 
+				1, 
+				NOW(), 
+				NOW() )
+	]]>
+	</insert>
+	
+	<update id="boardNewsCommWriteCntMod" parameterType="int">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_COMM_NEWS 
+			SET 
+				COMMENTS = #{comments}, 
+				MODDATE = SYSDATE 
+			WHERE 
+				COMMIDX = #{commIdx} 
+			AND 
+				BIDX = #{bIdx}	
+	]]>
+	</update>
+	
+	<update id="boardNewsCommDelete" parameterType="int">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_COMM_NEWS 
+		  	SET 
+		  		VIEWSTAT = 0 
+		  	WHERE 
+		  		COMMIDX = #{commIdx}
+	]]>
+	</update>
+	
+	<update id="boardNewsHit" parameterType="int">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_NEWS 
+		 	SET 
+		 		HIT = HIT +1 
+			WHERE 
+				BIDX = #{bIdx}
+	]]>	
+	</update>
+	
+	<update id="boardNewsGood" parameterType="int">
+	<![CDATA[	
+		UPDATE 
+			TF_BOARD_NEWS 
+			SET 
+				GOOD = GOOD + 1 
+			WHERE 
+				BIDX = #{bIdx}
+	]]>
+	</update>
+	
+	<update id="boardNewsBad" parameterType="int">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_NEWS 
+			SET 
+				BAD = BAD +1 
+			WHERE 
+				BIDX = #{bIdx}
+	]]>
+	</update>
+	
+</mapper>
+ 

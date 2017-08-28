@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mirin.tech.service.IMemberMapper">
+	
+    <select id="iMemberProjectList" parameterType="int" resultType="hashmap"> 
+   	<![CDATA[    
+			SELECT 
+	    			A.PIDX, 
+	    			A.IDX, 
+	    			A.PNAME, 
+	    			A.PCATE, 
+	    			A.PGRADE, 
+	    			A.PNFUNDS, 
+	    			A.PTFUNDS, 
+	    			B.INFUNDS, 
+	    			DATE_FORMAT(B.INSDATE,'%Y-%M-%D') AS INSDATE
+	   	    	FROM 
+	   	    		TF_PROJECT_LIST A, 
+	   	    		TF_FUND_HIS B 
+	   	    	WHERE 
+	   	    		A.PIDX = B.PIDX
+	   	    	AND 
+	   	    		B.STATUS = 1
+	   	   		AND 
+	   	   			B.IDX = #{0}
+				LIMIT 
+					#{1}, #{2}
+   	]]>	   		
+    </select>
+    
+    <select id="iMemberProjectListTc" parameterType="hashmap" resultType="int">
+    <![CDATA[
+    	SELECT 
+    		COUNT(*) 
+    	FROM 
+    		TF_PROJECT_LIST A, 
+    		TF_FUND_HIS B 
+	    WHERE 
+	    	A.PIDX = B.PIDX
+	   	AND 
+	   		B.STATUS = 1
+	   	AND 
+	   		B.IDX = #{sess_idx}
+	]]>
+    </select>
+    
+    <select id="iMemberQnaList" parameterType="int" resultType="com.mirin.tech.service.BoardVo">
+    <![CDATA[	
+  			SELECT 
+	    			BIDX, 
+	    			CATE, 
+	    			TITLE, 
+	    			VIEWSTAT, 
+	    			DATE_FORMAT(INSDATE,'%Y-%M-%D') AS INSDATE 
+            	FROM 
+            		TF_BOARD_QNA 
+            	WHERE 
+            		VIEWSTAT = 1 
+                AND 
+                	IDX = #{0} 
+                ORDER BY 
+                	OBIDX DESC, 
+                	RBIDX ASC
+				LIMIT 
+					#{1}, #{2}
+                	
+
+    ]]>			
+    </select>
+    
+    <select id="iMemberQnaListTc" parameterType="hashmap" resultType="int">
+    <![CDATA[	
+    	SELECT 
+    		COUNT(*)
+        FROM 
+        	TF_BOARD_QNA 
+        WHERE 
+        	VIEWSTAT = 1 
+        AND 
+        	IDX = #{sess_idx}
+    ]]>
+    </select>
+    
+    <select id="iMemberInfoCon" parameterType="int" resultType="com.mirin.tech.service.MemberVo">
+    <![CDATA[	
+    	SELECT 
+    		* 
+    	FROM 
+    		TF_MEMBER 
+    	WHERE 
+    		IDX = #{sess_idx}
+    ]]>		
+    </select>
+    
+    <select id="iMemberInfoModChk" parameterType="com.mirin.tech.service.MemberVo" resultType="int">
+    <![CDATA[	
+    	SELECT 
+    		COUNT(*) 
+    	FROM 
+    		TF_MEMBER 
+    	WHERE 
+    		IDX = #{idx} 
+    	AND 
+    		PW = #{pw}
+    ]]>			
+    </select>
+   	
+   	<update id="iMemInfoModAction" parameterType="hashmap">
+   	<![CDATA[	
+   		UPDATE 
+   			TF_MEMBER 
+		SET 
+			PW = #{pw}, 
+			NICK = #{nick}, 
+			PHONE = #{phone}, 
+			ADDR = #{addr}, 
+			MODDATE = SYSDATE 
+		WHERE 
+			IDX = #{sess_idx}
+	]]>		
+   	</update>
+    
+    <select id="iMemberMoneyHisList" parameterType="int" resultType="hashmap">
+    <![CDATA[    
+			SELECT 
+	    			A.MIDX, 
+	    			A.IDX, 
+	    			A.BMONEY, 
+	    			A.AMONEY, 
+	    			DATE_FORMAT(A.MODDATE,'%Y-%M-%D') AS MODDATE, 
+	    			DATE_FORMAT(A.INSDATE,'%Y-%M-%D') AS INSDATE,
+	    			A.CONTENTS, 
+	    			A.CHGMONEY,
+	    			A.STATUS, 
+	    			A.TYPE,  
+	    			B.MONEY 
+				FROM 
+					TF_MONEY_HIS A, 
+					TF_IMEMBER_EXT B 
+				WHERE 
+					A.IDX = B.IDX 
+				AND 
+					A.IDX = #{0} 
+				ORDER BY 
+					MODDATE DESC
+				LIMIT 
+					#{1}, #{2}
+   	]]>	   		
+    </select>
+    
+    <select id="iMemberMoneyHisListTc" parameterType="hashmap" resultType="int">
+    <![CDATA[
+	    SELECT 
+	    	COUNT(*)
+		FROM 
+			TF_MONEY_HIS A, 
+			TF_IMEMBER_EXT B 
+		WHERE 
+			A.IDX = B.IDX 
+		AND 
+			A.IDX = #{sess_idx}
+    ]]>
+    </select>
+    
+    <insert id="iMemberMoneyCharge" parameterType="hashmap">
+	<![CDATA[	
+		INSERT INTO 
+			TF_MONEY_HIS 
+				(MIDX, 
+				IDX, 
+				CONTENTS, 
+				CHGMONEY, 
+				BMONEY, 
+				AMONEY, 
+				STATUS, 
+				TYPE, 
+				INSDATE, 
+				MODDATE) 
+		VALUES 
+			(null, 
+			#{idx}, 
+			#{contents}, 
+			#{chgMoney}, 
+			(SELECT * FROM 
+				(SELECT 
+					AMONEY 
+					FROM 
+						TF_MONEY_HIS 
+					WHERE 
+						IDX = #{idx} 
+						ORDER BY MIDX DESC) 
+					WHERE 
+						ROWNUM = 1), 
+			(SELECT 
+				* 
+				FROM 
+				(SELECT 
+					AMONEY 
+					FROM 
+						TF_MONEY_HIS 
+					WHERE 
+						IDX = #{idx} 
+						ORDER BY MIDX DESC) 
+					WHERE 
+						ROWNUM = 1), 
+			0, 
+			0, 
+			NOW(),
+			NOW())
+	]]>		
+    </insert>
+	
+	<select id="iMemberWishList" parameterType="int" resultType="com.mirin.tech.service.ProjectVo">
+	<![CDATA[	
+		SELECT 
+			A.* 
+		FROM 
+			TF_PROJECT_LIST A,
+			TF_WISH_LIST B 
+		WHERE 
+			A.PIDX = B.PIDX 
+			AND 
+				B.VIEWSTAT = 1 
+			AND 
+				A.STATUS = 1 
+			AND 
+				B.IDX = #{sess_idx} 
+			ORDER BY WIDX	
+	]]>
+	</select>
+	
+	<update id="iMemberWishListDel" parameterType="int">
+	<![CDATA[	
+		UPDATE 
+			TF_WISH_LIST 
+		SET 
+			VIEWSTAT = 0 
+		WHERE 
+			PIDX = #{pidx}
+	]]>
+	</update>
+ 
+</mapper>
+

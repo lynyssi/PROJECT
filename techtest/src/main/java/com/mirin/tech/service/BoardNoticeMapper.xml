@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mirin.tech.service.BoardNoticeMapper">
+
+	<select id="boardNoticeList" resultType="com.mirin.tech.service.BoardVo" >
+	<![CDATA[	
+   	    SELECT 
+   	    	IDX,
+   	    	BIDX,
+   	    	TITLE,
+   	    	DATE_FORMAT(INSDATE,'%Y-%M-%D') AS INSDATE,
+   	    	HIT
+   	    	FROM 
+   	    		TF_BOARD_NOTICE
+			ORDER 
+				BY BIDX DESC 
+	]]>
+	</select>
+
+	<select id="boardNoticeCon" resultType="com.mirin.tech.service.BoardVo" parameterType="int" >
+	<![CDATA[	
+   	    SELECT 
+   	    	IDX,
+   	    	BIDX,
+   	    	TITLE,
+   	    	DATE_FORMAT(INSDATE,'%Y-%M-%D') AS INSDATE,
+   	    	HIT
+   	    	FROM 
+   	    		TF_BOARD_NOTICE
+			WHERE 
+				BIDX=#{bIdx}
+	]]>
+	</select>		
+	
+	<select id="boardNewsCommList" resultType="com.mirin.tech.service.BoardCommVo">
+	
+	<![CDATA[ 
+		SELECT 
+			A.*, B.NICK 
+		FROM 
+			TF_BOARD_COMM_NEWS A, 
+			TF_MEMBER B 
+		WHERE 
+			A.IDX = B.IDX 
+		AND 
+			A.BIDX = #{bIdx} 
+		AND 
+			A.OCOMMIDX = A.COMMIDX 
+		AND 
+			A.VIEWSTAT = 1 
+		ORDER BY 
+			A.OCOMMIDX DESC, 
+			A.RCOMMIDX ASC 
+	]]>
+	</select>
+	
+	<update id="boardNoticeHit" parameterType="int">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_NOTICE 
+		 	SET 
+		 		HIT = HIT +1 
+			WHERE 
+				BIDX = #{bIdx}
+	]]>	
+	</update>
+		
+</mapper>
+ 
+
+

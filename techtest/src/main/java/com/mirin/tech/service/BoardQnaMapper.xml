@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mirin.tech.service.BoardQnaMapper">
+	<insert id="boardQnaWrite" parameterType="com.mirin.tech.service.BoardVo">
+	<![CDATA[	
+		INSERT INTO 
+			TF_BOARD_QNA 
+				(BIDX, 
+				IDX, 
+				PIDX, 
+				CATE, 
+				TITLE, 
+				CONTENTS, 
+				HIT, 
+				GOOD, 
+				BAD, 
+				OBIDX, 
+				RBIDX, 
+				BDEPTH, 
+				COMMCNT, 
+				VIEWSTAT, 
+				INSDATE, 
+				MODDATE )
+				  VALUES 
+				  (null, 
+				  #{idx}, 
+				  0, 
+				  #{cate, jdbcType=VARCHAR}, 
+				  #{title}, 
+				  #{contents}, 
+				  0, 
+				  0, 
+				  0, 
+				  0, 
+				  1, 
+				  1, 
+				  0, 
+				  1, 
+				  NOW(), 
+				  NOW())
+	]]>			  
+	</insert>
+
+	<select id="boardQnaList" resultType="com.mirin.tech.service.BoardVo" >
+	<![CDATA[
+		SELECT 
+			* 
+		FROM 
+			TF_BOARD_QNA 
+		WHERE 
+			VIEWSTAT = 1 
+		AND 
+			IDX = #{sess_idx}
+		ORDER BY 
+			BIDX DESC	
+	]]>	
+	</select>
+	
+	<select id="boardQnaCon" resultType="com.mirin.tech.service.BoardVo" parameterType="int" >
+	<![CDATA[
+		SELECT 
+			* 
+		FROM 
+			TF_BOARD_QNA 
+		WHERE 
+			BIDX = #{bIdx} 	
+	]]>	
+	</select>
+	
+	<select id="boardQnaModCon" resultType="com.mirin.tech.service.BoardVo" parameterType="int">
+	<![CDATA[
+		SELECT 
+			TITLE, 
+			CONTENTS, 
+			BIDX, 
+			CATE 
+		FROM 
+			TF_BOARD_QNA 
+		WHERE 
+			BIDX = #{bIdx} 	
+	]]>
+	
+	</select>
+	
+	<update id ="boardQnaMod" parameterType="com.mirin.tech.service.BoardVo">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_QNA 
+		SET 
+			TITLE = #{title}, 
+			CONTENTS = #{contents},  
+			MODDATE = SYSDATE 
+		WHERE 
+			BIDX = #{bIdx} 
+	]]>	
+	</update>
+	
+	<update id="boardQnaDel" parameterType="int">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_QNA 
+		SET 
+			VIEWSTAT = 0 
+		WHERE 
+			BIDX = #{bIdx} 
+	]]>		
+	</update>
+	
+	<update id="boardQnaHit" parameterType="int">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_QNA 
+		SET 
+			HIT = HIT +1 
+		WHERE 
+			BIDX = #{bIdx}
+	]]>	
+	</update>		  	 
+			  	 
+	<update id="boardQnaGood" parameterType="int">
+	<![CDATA[	
+		UPDATE 
+			TF_BOARD_QNA 
+			SET 
+				GOOD = GOOD + 1 
+			WHERE 
+				BIDX = #{bIdx}
+	]]>	
+	</update>		  	 
+
+	<update id="boardQnaBad" parameterType="int">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_QNA 
+			SET 
+				BAD = BAD +1 
+			WHERE 
+				BIDX = #{bIdx}
+	]]>	
+	</update>
+
+</mapper>
+ 
+
+

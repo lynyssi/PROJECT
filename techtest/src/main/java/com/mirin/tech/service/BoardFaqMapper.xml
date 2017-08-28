@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mirin.tech.service.BoardFaqMapper">
+
+ 	<select id="boardFaqList" resultType="com.mirin.tech.service.BoardVo" >
+ 	<![CDATA[	   
+   	    SELECT 
+   	    	IDX,
+   	    	BIDX,
+   	    	TITLE,
+   	    	DATE_FORMAT(INSDATE,'%Y-%M-%D') AS INSDATE,
+   	    	HIT
+   	    	FROM 
+   	    		TF_BOARD_FAQ
+			ORDER 
+				BY BIDX DESC	
+	]]>    
+    </select>
+       			
+	<select id="boardFaqCon" resultType="com.mirin.tech.service.BoardVo" parameterType="int" >
+	<![CDATA[	
+   	    SELECT 
+   	    	IDX,
+   	    	BIDX,
+   	    	TITLE,
+   	    	DATE_FORMAT(INSDATE,'%Y-%M-%D') AS INSDATE,
+   	    	HIT
+   	    	FROM 
+   	    		TF_BOARD_FAQ
+			WHERE 
+				BIDX=#{bIdx}
+	]]>
+	</select>
+	
+	<update id="boardFaqHit" parameterType="int">
+	<![CDATA[
+		UPDATE 
+			TF_BOARD_FAQ 
+		 	SET 
+		 		HIT = HIT +1 
+			WHERE 
+				BIDX = #{bIdx}
+	]]>	
+	</update>	
+
+</mapper>
+ 
+
+
